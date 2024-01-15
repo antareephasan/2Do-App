@@ -4,7 +4,7 @@ import TodoList from '@/components/shared/todo-list'
 
 export default function Home() {
   return (
-    <div className='flex flex-col justify-center items-center'>
+    <div className='flex w-full flex-col justify-center items-center'>
       <Navbar />
       <TodoInput />
       <TodoList />
