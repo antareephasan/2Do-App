@@ -39,8 +39,10 @@ const TodoInput = () => {
                     title: "Error",
                     description: "No user found!",
                 })
-            }
 
+                return;
+            }
+            form.reset();
             toast({ 
                 variant: "success",
                 title: "Success", 
