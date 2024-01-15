@@ -1,7 +1,7 @@
-import mongoose, { Schema, model, models } from "mongoose"
+import { Schema, model, models } from "mongoose";
 
 const TodoSchema = new Schema({
-    creator: { type: mongoose.Types.ObjectId, required: true },
+    creator: { type: Schema.Types.ObjectId, ref: 'User'},
     task: { type: String, required: true },
     isCompleted: { type: Boolean, default: false },
 })

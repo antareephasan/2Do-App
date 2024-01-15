@@ -1,3 +1,5 @@
+"use server";
+
 import { connectToDatabase } from "@/lib/database/db";
 import User from "@/lib/database/models/user.model";
 import { CreateUserParams } from "@/types";

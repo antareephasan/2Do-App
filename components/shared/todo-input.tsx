@@ -10,8 +10,14 @@ import * as z from "zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@clerk/nextjs";
+import { createTodo } from "@/action/todo-actions";
+import { toast } from "../ui/use-toast";
+import { useTransition } from "react";
 
 const TodoInput = () => {
+    const [isPending, startTransition] = useTransition();
+    const { userId } = useAuth();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -21,7 +27,26 @@ const TodoInput = () => {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        startTransition(async () => {
+            const newTodo = await createTodo({
+                todo: values,
+                userId: userId
+            })
+
+            if (newTodo.error) {
+                toast({
+                    variant: "destructive", 
+                    title: "Error",
+                    description: "No user found!",
+                })
+            }
+
+            toast({ 
+                variant: "success",
+                title: "Success", 
+                description: "Todo created successfully!" 
+            })
+        })
     }
 
     return (
@@ -36,6 +61,7 @@ const TodoInput = () => {
                                 <FormItem>
                                     <FormControl>
                                         <Input
+                                            disabled={isPending}
                                             placeholder="Enter your todo..."
                                             {...field}
                                             className="border-none text-xl p-0 focus-visible:ring-transparent focus-visible:ring-0"
@@ -46,7 +72,13 @@ const TodoInput = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button className="w-full p-2 text-lg bg-black" type="submit">Add</Button>
+                        <Button
+                            disabled={isPending}
+                            className="w-full p-2 text-lg bg-black"
+                            type="submit"
+                        >
+                            Add
+                        </Button>
                     </div>
                 </form>
             </Form>
