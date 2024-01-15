@@ -1,15 +1,17 @@
 import TodoBox from "@/components/shared/todo-box";
 
-const TodoList = () => {
-    return ( 
+const TodoList = ({ todos }: { 
+    todos: any
+}) => {
+    return (
         <div>
-            {/* TODO: MAP TodoBoxes */}
-            <TodoBox />
-            <TodoBox />
-            <TodoBox />
-            <TodoBox />
+            {
+                todos.map((todo: any) => (
+                    <TodoBox key={todo._id} todo={todo} />
+                ))
+            }
         </div>
-     );
+    );
 }
- 
+
 export default TodoList;

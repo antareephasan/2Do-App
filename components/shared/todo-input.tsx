@@ -10,14 +10,12 @@ import * as z from "zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@clerk/nextjs";
 import { createTodo } from "@/action/todo-actions";
 import { toast } from "../ui/use-toast";
 import { useTransition } from "react";
 
-const TodoInput = () => {
+const TodoInput = ({ userId }: { userId: string | null | undefined }) => {
     const [isPending, startTransition] = useTransition();
-    const { userId } = useAuth();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
