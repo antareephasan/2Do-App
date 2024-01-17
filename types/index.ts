@@ -16,7 +16,7 @@ export type UpdateTodoParams = {
   todo: {
     task: string;
     isCompleted: boolean;
-    todoId: string;
   };
+  todoId: string;
   userId: string | null | undefined;
 };

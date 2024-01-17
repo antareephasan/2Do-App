@@ -16,14 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createTodo, getTodoByTodoId, updateTodo } from "@/action/todo-actions";
 import { toast } from "../ui/use-toast";
-import { useEffect, useState, useTransition } from "react";
+import { SetStateAction, useEffect, useState, useTransition } from "react";
 
 interface TodoProps {
-  userId: string;
-  updateTodoId: string;
+  userId: string | null;
+  updateTodoId: string | undefined;
+  setUpdateTodoId: React.Dispatch<SetStateAction<string>>;
 }
 
-const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
+const TodoInput = ({ userId, updateTodoId, setUpdateTodoId }: TodoProps) => {
   const [isPending, startTransition] = useTransition();
   const [editMode, setEditMode] = useState(false);
   const [updatedTodo, setUpdatedTodo] = useState({
@@ -31,7 +32,6 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
     isCompleted: false,
     todoId: "",
   });
-  console.log(editMode);
 
   useEffect(() => {
     if (updateTodoId) {
@@ -44,16 +44,16 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
       );
       setEditMode(true);
     } else {
-      console.log("Failed to fetch TodoID");
       setEditMode(false);
     }
   }, [updateTodoId]);
 
-  console.log({ ...updatedTodo });
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {},
+    defaultValues: {
+      task: "",
+      isCompleted: false
+    },
   });
 
   // Update form values when updatedTodo changes
@@ -64,7 +64,8 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
 
   //Reset Function
   const reset = () => {
-    setEditMode(false),
+    setUpdateTodoId(""),
+      setEditMode(false),
       setUpdatedTodo({
         task: "",
         isCompleted: false,
@@ -89,12 +90,14 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
 
         return;
       }
-      reset();
+
       toast({
         variant: "success",
         title: "Success",
         description: "Todo Created Successfully!",
       });
+
+      reset();
     });
   }
 
@@ -116,19 +119,16 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
 
         return;
       }
-      reset();
+
       toast({
         variant: "success",
         title: "Success",
         description: "Todo Updated Successfully!",
       });
+      reset();
     });
   }
 
-  //Cancle Edit Todo
-  const cancelEditTodo = () => {
-    reset();
-  };
 
   return (
     <Card className="mt-5 w-[350px] sm:w-[400px] lg:w-[600px]">
@@ -159,7 +159,7 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
             />
             <Button
               disabled={isPending}
-              className="w-full p-2 text-lg bg-slate-700 hover:bg-slate-900"
+              className="w-full p-2 text-lg bg-black hover:bg-slate-900"
               type="submit"
             >
               {editMode ? "Edit Your Todo" : "Add"}
@@ -167,7 +167,7 @@ const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
 
             {editMode && (
               <Button
-                onClick={cancelEditTodo}
+                onClick={reset}
                 disabled={isPending}
                 className="w-full p-2 text-lg bg-red-400 hover:bg-red-600 "
                 type="submit"

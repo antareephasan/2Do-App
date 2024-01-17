@@ -7,8 +7,6 @@ export default async function Home() {
   const { userId } = auth();
 
   const todos = await getAllTodosByUserId(userId);
-  // console.log(todos)
-
   // I have to make the update function here and pass it in TodoInput & Todolist Component
 
   return (

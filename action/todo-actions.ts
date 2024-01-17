@@ -8,8 +8,8 @@ import { auth } from "@clerk/nextjs";
 import { revalidatePath } from "next/cache";
 
 export const createTodo = async ({ todo, userId }: CreateTodoParams) => {
-  await connectToDatabase();
   try {
+    await connectToDatabase();
     const existingUser = await User.findOne({
       clerkId: userId,
     });
@@ -53,24 +53,24 @@ export const getAllTodosByUserId = async (
 
 // TOGGLE TO COMPLETE/INCOMPLETE TODO
 export const changeTodoState = async (id: string) => {
-  await connectToDatabase();
-
-  const { userId } = auth();
-
-  const existingUser = await User.findOne({
-    clerkId: userId,
-  });
-
-  if (!existingUser) return { error: "No User found" };
   try {
+    await connectToDatabase();
+
+    const { userId } = auth();
+
+    const existingUser = await User.findOne({
+      clerkId: userId,
+    });
+
+    if (!existingUser) return { error: "No User found" };
     const existingTodo = await Todo.findById(id);
 
     if (!existingTodo) return { error: "No Todo found!" };
-
+    
     const toggleTodoCheckMark = await Todo.findByIdAndUpdate(
       existingTodo._id,
-
-      { isCompleted: !existingTodo.isCompleted }
+      { isCompleted: !existingTodo.isCompleted },
+      { new: true }
     );
 
     if (!toggleTodoCheckMark) {
@@ -85,17 +85,16 @@ export const changeTodoState = async (id: string) => {
 
 // GET TODO BY TODO ID
 export const getTodoByTodoId = async (id: string) => {
-  await connectToDatabase();
-
-  const { userId } = auth();
-
-  const existingUser = await User.findOne({
-    clerkId: userId,
-  });
-
-  if (!existingUser) return { error: "No User found" };
-
   try {
+    await connectToDatabase();
+
+    const { userId } = auth();
+
+    const existingUser = await User.findOne({
+      clerkId: userId,
+    });
+
+    if (!existingUser) return { error: "No User found" };
     const existingTodo = await Todo.findById(id);
 
     if (!existingTodo) return { error: "No Todo found!" };
@@ -108,8 +107,8 @@ export const getTodoByTodoId = async (id: string) => {
 
 // UPDATE || EDIT TODO
 export const updateTodo = async ({ todo, userId, todoId }: UpdateTodoParams) => {
-  await connectToDatabase();
   try {
+    await connectToDatabase();
     const existingUser = await User.findOne({
       clerkId: userId,
     });
@@ -122,8 +121,6 @@ export const updateTodo = async ({ todo, userId, todoId }: UpdateTodoParams) => 
       ...todo,
     });
 
-    console.log(updateTodo);
-
     revalidatePath("/");
     return JSON.parse(JSON.stringify(updateTodo));
   } catch (error) {
@@ -133,21 +130,24 @@ export const updateTodo = async ({ todo, userId, todoId }: UpdateTodoParams) => 
 
 // DELETE TODO
 export const deleteTodo = async (id: string) => {
-  await connectToDatabase();
-
-  const { userId } = auth();
-
-  const existingUser = await User.findOne({
-    clerkId: userId,
-  });
-
-  if (!existingUser) return { error: "No User found" };
-
   try {
+    await connectToDatabase();
+
+    const { userId } = auth();
+
+    const existingUser = await User.findOne({
+      clerkId: userId,
+    });
+
+    if (!existingUser) return { error: "No User found" };
+
     const existingTodo = await Todo.findById(id);
 
     if (!existingTodo) return { error: "No Todo found!" };
-    // if(existingUser._id !== existingTodo.creator) return { error: 'You are not authorized mf'}
+
+    // Confirming that the user is the one created this todo
+    if(existingUser._id.toHexString() !== existingTodo.creator.toHexString()) return { error: 'You are not authorized to perform this action!'}
+
     await Todo.findByIdAndDelete(existingTodo._id);
 
     revalidatePath("/");

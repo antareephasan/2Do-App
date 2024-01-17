@@ -6,16 +6,16 @@ import TodoList from "@/components/shared/todo-list";
 import { useState } from "react";
 
 interface HomePageProps {
-  userId: string;
+  userId: string | null;
   todos: any;
 }
 
 const HomePage = ({ userId, todos }: HomePageProps) => {
-  const [updateTodoId, setUpdateTodoId] = useState();
+  const [updateTodoId, setUpdateTodoId] = useState("");
   return (
     <>
       <Navbar />
-      <TodoInput userId={userId} updateTodoId={updateTodoId} />
+      <TodoInput userId={userId} updateTodoId={updateTodoId} setUpdateTodoId={setUpdateTodoId} />
       <TodoList todos={todos} setUpdateTodoId={setUpdateTodoId}/>
     </>
   );
