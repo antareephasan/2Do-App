@@ -1,90 +1,185 @@
 "use client";
 
+import { Card } from "@/components/ui/card";
+import { formSchema } from "@/schema/todo-schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 import {
-    Card,
-} from "@/components/ui/card"
-import { formSchema } from "@/schema/todo-schema"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { createTodo } from "@/action/todo-actions";
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { createTodo, getTodoByTodoId, updateTodo } from "@/action/todo-actions";
 import { toast } from "../ui/use-toast";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
-const TodoInput = ({ userId }: { userId: string | null | undefined }) => {
-    const [isPending, startTransition] = useTransition();
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            task: "",
-            isCompleted: false
-        }
-    })
-
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        startTransition(async () => {
-            const newTodo = await createTodo({
-                todo: values,
-                userId: userId
-            })
-
-            if (newTodo.error) {
-                toast({
-                    variant: "destructive", 
-                    title: "Error",
-                    description: "No user found!",
-                })
-
-                return;
-            }
-            form.reset();
-            toast({ 
-                variant: "success",
-                title: "Success", 
-                description: "Todo created successfully!" 
-            })
-        })
-    }
-
-    return (
-        <Card className="mt-5 w-[350px] sm:w-[400px] lg:w-[600px]">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="p-5 flex flex-col gap-5">
-                        <FormField
-                            control={form.control}
-                            name="task"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Input
-                                            disabled={isPending}
-                                            placeholder="Enter your todo..."
-                                            {...field}
-                                            className="border-none text-xl p-0 focus-visible:ring-transparent focus-visible:ring-0"
-                                        />
-                                    </FormControl>
-
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button
-                            disabled={isPending}
-                            className="w-full p-2 text-lg bg-black"
-                            type="submit"
-                        >
-                            Add
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </Card>
-
-    );
+interface TodoProps {
+  userId: string;
+  updateTodoId: string;
 }
+
+const TodoInput = ({ userId, updateTodoId }: TodoProps) => {
+  const [isPending, startTransition] = useTransition();
+  const [editMode, setEditMode] = useState(false);
+  const [updatedTodo, setUpdatedTodo] = useState({
+    task: "",
+    isCompleted: false,
+    todoId: "",
+  });
+  console.log(editMode);
+
+  useEffect(() => {
+    if (updateTodoId) {
+      getTodoByTodoId(updateTodoId).then((data) =>
+        setUpdatedTodo({
+          task: data.task,
+          isCompleted: data.isCompleted,
+          todoId: data._id,
+        })
+      );
+      setEditMode(true);
+    } else {
+      console.log("Failed to fetch TodoID");
+      setEditMode(false);
+    }
+  }, [updateTodoId]);
+
+  console.log({ ...updatedTodo });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {},
+  });
+
+  // Update form values when updatedTodo changes
+  useEffect(() => {
+    form.setValue("task", updatedTodo.task);
+    form.setValue("isCompleted", updatedTodo.isCompleted);
+  }, [updatedTodo, form]);
+
+  //Reset Function
+  const reset = () => {
+    setEditMode(false),
+      setUpdatedTodo({
+        task: "",
+        isCompleted: false,
+        todoId: "",
+      });
+  };
+
+  // CREATE NEW TODO
+  function submitCreateTodo(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const newTodo = await createTodo({
+        todo: values,
+        userId: userId,
+      });
+
+      if (newTodo.error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No User Found!",
+        });
+
+        return;
+      }
+      reset();
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Todo Created Successfully!",
+      });
+    });
+  }
+
+  // UPDATE EXISTING TODO
+  function submitUpdatedTodo(values: z.infer<typeof formSchema>) {
+    startTransition(async () => {
+      const updateExistingTodo = await updateTodo({
+        todoId: updatedTodo.todoId,
+        todo: values,
+        userId: userId,
+      });
+
+      if (updateExistingTodo.error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No user found!",
+        });
+
+        return;
+      }
+      reset();
+      toast({
+        variant: "success",
+        title: "Success",
+        description: "Todo Updated Successfully!",
+      });
+    });
+  }
+
+  //Cancle Edit Todo
+  const cancelEditTodo = () => {
+    reset();
+  };
+
+  return (
+    <Card className="mt-5 w-[350px] sm:w-[400px] lg:w-[600px]">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(
+            updateTodoId ? submitUpdatedTodo : submitCreateTodo
+          )}
+          className="space-y-8"
+        >
+          <div className="p-5 flex flex-col gap-5">
+            <FormField
+              control={form.control}
+              name="task"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      disabled={isPending}
+                      placeholder="Enter your todo..."
+                      {...field}
+                      className="border-none text-xl p-0 focus-visible:ring-transparent focus-visible:ring-0"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              disabled={isPending}
+              className="w-full p-2 text-lg bg-slate-700 hover:bg-slate-900"
+              type="submit"
+            >
+              {editMode ? "Edit Your Todo" : "Add"}
+            </Button>
+
+            {editMode && (
+              <Button
+                onClick={cancelEditTodo}
+                disabled={isPending}
+                className="w-full p-2 text-lg bg-red-400 hover:bg-red-600 "
+                type="submit"
+              >
+                Cancle
+              </Button>
+            )}
+          </div>
+        </form>
+      </Form>
+    </Card>
+  );
+};
 
 export default TodoInput;

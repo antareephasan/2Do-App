@@ -3,7 +3,7 @@ import { UserButton } from "@clerk/nextjs";
 
 const Navbar = () => {
     return (
-        <nav className="px-5 md:px-10 py-2 flex flex-row justify-between bg-black h-12 w-full lg:w-[1280px]">
+        <nav className="px-5 md:px-10 py-2 flex flex-row justify-between bg-black h-12 w-full lg:max-w-[1280px]">
             <Image
                 src="/assets/images/logo.png"
                 alt="logo"
