@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createTodo, getTodoByTodoId, updateTodo } from "@/action/todo-actions";
 import { toast } from "../ui/use-toast";
-import { SetStateAction, useEffect, useState, useTransition } from "react";
+import { SetStateAction, useEffect, useTransition } from "react";
 
 interface TodoProps {
   userId: string | null;
@@ -27,27 +27,6 @@ interface TodoProps {
 
 const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoProps) => {
   const [isPending, startTransition] = useTransition();
-  const [editMode, setEditMode] = useState(false);
-  const [updatedTodo, setUpdatedTodo] = useState({
-    task: "",
-    isCompleted: false,
-    todoId: "",
-  });
-
-  useEffect(() => {
-    if (updateTodoId) {
-      getTodoByTodoId(updateTodoId).then((data) =>
-        setUpdatedTodo({
-          task: data.task,
-          isCompleted: data.isCompleted,
-          todoId: data._id,
-        })
-      );
-      setEditMode(true);
-    } else {
-      setEditMode(false);
-    }
-  }, [updateTodoId]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,21 +36,20 @@ const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoPr
     },
   });
 
-  // Update form values when updatedTodo changes
   useEffect(() => {
-    form.setValue("task", updatedTodo.task);
-    form.setValue("isCompleted", updatedTodo.isCompleted);
-  }, [updatedTodo, form]);
+    if (updateTodoId) {
+      getTodoByTodoId(updateTodoId).then((data) => {
+        form.setValue("task", data.task);
+        form.setValue("isCompleted", data.isCompleted);
+      });
+    }
+  }, [updateTodoId]);
+
 
   //Reset Function
   const reset = () => {
-    setUpdateTodoId(""),
-      setEditMode(false),
-      setUpdatedTodo({
-        task: "",
-        isCompleted: false,
-        todoId: "",
-      });
+    setUpdateTodoId("");
+    form.reset();
   };
 
   // CREATE NEW TODO
@@ -106,7 +84,8 @@ const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoPr
   function submitUpdatedTodo(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
       const updateExistingTodo = await updateTodo({
-        todoId: updatedTodo.todoId,
+        // todoId: updatedTodo.todoId,
+        todoId: updateTodoId as string,
         todo: values,
         userId: userId,
       });
@@ -163,10 +142,10 @@ const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoPr
               className="w-full p-2 text-lg bg-black hover:bg-slate-900"
               type="submit"
             >
-              {editMode ? "Edit Your Todo" : "Add"}
+              {updateTodoId ? "Update" : "Add"}
             </Button>
 
-            {editMode && (
+            {updateTodoId && (
               <Button
                 onClick={reset}
                 disabled={isPending}
