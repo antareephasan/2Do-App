@@ -5,32 +5,50 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "../ui/use-toast";
+import { cn } from "@/lib/utils";
+import { any } from "zod";
 
-const TodoBox = ({ todo, setUpdateTodoId }: { todo: any, setUpdateTodoId: any }) => {
+interface TodoBoxProps {
+  todo: any;
+  setUpdateTodoId: React.Dispatch<React.SetStateAction<string>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const TodoBox = ({
+  todo,
+  setUpdateTodoId,
+  setLoading
+}: TodoBoxProps) => {
   const [isCompleted, setIsCompleted] = useState(todo.isCompleted);
 
   //In here I have to update the todo value Immutably after its coming from Todo-actions.
   const toggleTodo = () => {
+    setLoading(true)
     changeTodoState(todo._id).then((data) => {
       setIsCompleted(data.isCompleted);
+    }).finally(() => {
+      setLoading(false);
     });
   };
 
   const handleDelete = () => {
+    setLoading(true)
     deleteTodo(todo._id).then((data) => {
       toast({
         title: "Deleted!",
         description: "Successfully deleted the task.",
         variant: "destructive"
       })
+    }).finally(() => {
+      setLoading(false);
     });
   };
 
 
   return (
     <Card className="mt-5 w-[350px] sm:w-[400px] lg:w-[600px]">
-      <div className="flex justify-between items-center py-4 px-10">
-        <div className="flex items-center">
+      <div className="flex justify-between items-center py-4 px-10 w-full">
+        <div className="flex items-center w-full">
           <Image
             onClick={toggleTodo}
             alt="Circle Image"
@@ -43,15 +61,18 @@ const TodoBox = ({ todo, setUpdateTodoId }: { todo: any, setUpdateTodoId: any })
             }
             className="cursor-pointer"
           />
-          <CardHeader>
+          <CardHeader className="w-full">
             <CardTitle
-              className={isCompleted ? "line-through" : ""}
+              className={cn(
+                "text-lg font-bold w-full text",
+                isCompleted && "line-through"
+              )}
             >
               {todo.task}
             </CardTitle>
           </CardHeader>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-5">
           <Image
             onClick={() => setUpdateTodoId(todo._id)}
             className="cursor-pointer"

@@ -22,9 +22,10 @@ interface TodoProps {
   userId: string | null;
   updateTodoId: string | undefined;
   setUpdateTodoId: React.Dispatch<SetStateAction<string>>;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const TodoInput = ({ userId, updateTodoId, setUpdateTodoId }: TodoProps) => {
+const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoProps) => {
   const [isPending, startTransition] = useTransition();
   const [editMode, setEditMode] = useState(false);
   const [updatedTodo, setUpdatedTodo] = useState({
