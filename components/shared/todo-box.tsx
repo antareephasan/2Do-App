@@ -6,7 +6,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { toast } from "../ui/use-toast";
 import { cn } from "@/lib/utils";
-import { any } from "zod";
 
 interface TodoBoxProps {
   todo: any;
