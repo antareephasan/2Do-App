@@ -18,7 +18,7 @@ const HomePage = ({ userId, todos }: HomePageProps) => {
     <>
       <Navbar />
       <TodoInput userId={userId} updateTodoId={updateTodoId} setUpdateTodoId={setUpdateTodoId} setLoading={setLoading} />
-      <TodoList todos={todos} setUpdateTodoId={setUpdateTodoId} setLoading={setLoading} />
+      <TodoList todos={todos} updateTodoId={updateTodoId} setUpdateTodoId={setUpdateTodoId} setLoading={setLoading} />
       <SpinnerOverlay loading={loading} />
     </>
   );

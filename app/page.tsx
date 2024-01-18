@@ -10,7 +10,7 @@ export default async function Home() {
   // I have to make the update function here and pass it in TodoInput & Todolist Component
 
   return (
-    <div className="flex w-full flex-col justify-center items-center">
+    <div className="flex p-2 w-full flex-col justify-center items-center">
       <HomePage userId={userId} todos={todos} />
     </div>
   );

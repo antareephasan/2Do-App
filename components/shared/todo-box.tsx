@@ -10,12 +10,14 @@ import { any } from "zod";
 
 interface TodoBoxProps {
   todo: any;
+  updateTodoId: string | undefined;
   setUpdateTodoId: React.Dispatch<React.SetStateAction<string>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const TodoBox = ({
   todo,
+  updateTodoId,
   setUpdateTodoId,
   setLoading
 }: TodoBoxProps) => {
@@ -23,6 +25,8 @@ const TodoBox = ({
 
   //In here I have to update the todo value Immutably after its coming from Todo-actions.
   const toggleTodo = () => {
+    // RESTRICT EDIT WHEN ALREADY EDITING NOTE: UNNECCESARY
+    if(updateTodoId === todo._id) return;
     setLoading(true)
     changeTodoState(todo._id).then((data) => {
       setIsCompleted(data.isCompleted);
@@ -32,6 +36,8 @@ const TodoBox = ({
   };
 
   const handleDelete = () => {
+    // RESTRICT DELETE WHEN EDITING
+    if(updateTodoId === todo._id) return;
     setLoading(true)
     deleteTodo(todo._id).then((data) => {
       toast({

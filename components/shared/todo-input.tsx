@@ -38,11 +38,15 @@ const TodoInput = ({ userId, updateTodoId, setUpdateTodoId, setLoading }: TodoPr
 
   useEffect(() => {
     if (updateTodoId) {
+      setLoading(true);
       getTodoByTodoId(updateTodoId).then((data) => {
         form.setValue("task", data.task);
         form.setValue("isCompleted", data.isCompleted);
+      }).finally(() => {
+        setLoading(false);
       });
     }
+    
   }, [updateTodoId]);
 
 
