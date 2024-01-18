@@ -14,6 +14,14 @@ pnpm dev
 bun dev
 ```
 
+## Error: 
+
+"Cannot find module 'react' or its corresponding type declarations -
+
+Solution-Link: [https://learn.microsoft.com/en-us/answers/questions/877085/error-cannot-find-module-react-or-its-correspondin]
+
+
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
